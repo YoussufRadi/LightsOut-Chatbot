@@ -22,7 +22,6 @@
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
         android:id="@+id/form"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true">
 
         <EditText
@@ -34,6 +33,12 @@
             android:ems="10"
             android:layout_alignParentRight="true"/>
 
+        <Button
+            android:layout_width="@android:dimen/app_icon_size"
+            android:layout_height="@android:dimen/app_icon_size"
+            android:layout_alignRight="@id/editText"
+            android:background="@drawable/send_button"
+            android:id="@+id/send"/>
     </RelativeLayout>
 
 </RelativeLayout>

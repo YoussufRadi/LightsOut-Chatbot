@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private MessageAdapter adapter;
     private ListView lv;
     private EditText edit;
+    private Button send;
     String uuid;
 
     @Override
@@ -49,6 +51,16 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 return false;
+            }
+        });
+        send = (Button) findViewById(R.id.send);
+        send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(edit.getText() != null || !edit.getText().equals("")) {
+                    adapter.add(new Message(false, edit.getText().toString()));
+                    edit.setText("");
+                }
             }
         });
         new FetchAuthFromApi().execute();
