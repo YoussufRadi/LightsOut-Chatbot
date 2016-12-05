@@ -1,6 +1,5 @@
 package com.malproject.youssufradi.lightsout_chatbot;
 
-import android.content.ContentValues;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,12 +22,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -39,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText edit;
     private Button send;
     String uuid;
+    boolean recieved = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,14 +52,11 @@ public class MainActivity extends AppCompatActivity {
         edit.setFocusable(false);
         edit.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    Toast.makeText(getApplicationContext(),edit.getText().toString(),Toast.LENGTH_SHORT).show();
-                    new PostDataToApi().execute(edit.getText().toString());
-                    adapter.add(new Message(false, edit.getText().toString()));
-                    edit.setText("");
-
-                    return true;
-                }
+                if(recieved)
+                    if ((event.getAction() == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                        postData();
+                        return true;
+                    }
                 return false;
             }
         });
@@ -70,16 +64,22 @@ public class MainActivity extends AppCompatActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(edit.getText() != null || !edit.getText().equals("")) {
-                    Toast.makeText(getApplicationContext(),edit.getText().toString(),Toast.LENGTH_SHORT).show();
-                    new PostDataToApi().execute(edit.getText().toString());
-                    adapter.add(new Message(false, edit.getText().toString()));
-                    edit.setText("");
-                }
+                if(recieved)
+                    if(edit.getText() != null || !edit.getText().equals("")) {
+                        postData();
+                    }
             }
         });
         new FetchAuthFromApi().execute();
 //        addItems();
+    }
+
+    public void postData(){
+        new PostDataToApi().execute(edit.getText().toString());
+        adapter.add(new Message(false, edit.getText().toString()));
+        edit.setText("");
+        recieved = false;
+        lv.setSelection(adapter.getCount() - 1);
     }
 
     class FetchAuthFromApi extends AsyncTask<Void,Void,JSONObject> {
@@ -153,43 +153,11 @@ public class MainActivity extends AppCompatActivity {
                 uuid = result.getString("uuid");
                 adapter.add(new Message(true,result.getString("message")));
                 edit.setFocusableInTouchMode(true);
+                recieved = true;
             }catch (Exception e){
                 Log.e(LOG_TAG, "onPostExecute: "+ e.toString() );
             }
 
-        }
-    }
-
-    private class PostTask extends AsyncTask<String, String, String> {
-        @Override
-        protected String doInBackground(String... data) {
-            try {
-                URL url = new URL("https://lights-out-chatbot.herokuapp.com");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setReadTimeout(10000);
-                conn.setConnectTimeout(15000);
-                conn.setRequestMethod("POST");
-                conn.setDoOutput(true);
-                ContentValues values = new ContentValues();
-                values.put("message", data[0]);
-                conn.setRequestProperty("Authorization", uuid);
-                conn.setRequestProperty("Content-Type", "application/json");
-                OutputStream os = conn.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-                StringBuilder sb = new StringBuilder();
-                sb.append(URLEncoder.encode("message", "UTF-8"));
-                sb.append("=");
-                sb.append(URLEncoder.encode(data[0], "UTF-8"));
-                writer.write(sb.toString());
-                writer.flush();
-                writer.close();
-                os.close();
-                conn.connect();
-                return "Text sent: " + data[0];
-            } catch (IOException e) {
-                e.printStackTrace();
-                return "LOL NOPE";
-            }
         }
     }
 
@@ -249,29 +217,14 @@ public class MainActivity extends AppCompatActivity {
             return response;
         }
 
-        private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
-            StringBuilder result = new StringBuilder();
-            boolean first = true;
-            for(Map.Entry<String, String> entry : params.entrySet()){
-                if (first)
-                    first = false;
-                else
-                    result.append("&");
-
-                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                result.append("=");
-                result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-            }
-
-            return result.toString();
-        }
-
         protected void onPostExecute(String result) {
             if(result == null) {
                 Toast.makeText(getApplicationContext(), "No Internet Connection", Toast.LENGTH_SHORT).show();
                 return;
             }
             adapter.add(new Message(true,result));
+            recieved = true;
+            lv.setSelection(adapter.getCount() - 1);
         }
     }
 

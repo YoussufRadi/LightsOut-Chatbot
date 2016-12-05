@@ -31,14 +31,15 @@
             android:layout_alignParentLeft="true"
             android:inputType="text"
             android:ems="10"
-            android:layout_alignParentRight="true"/>
+            android:layout_toStartOf="@+id/send"/>
 
         <Button
             android:layout_width="@android:dimen/app_icon_size"
             android:layout_height="@android:dimen/app_icon_size"
-            android:layout_alignRight="@id/editText"
             android:background="@drawable/send_button"
-            android:id="@+id/send"/>
+            android:id="@+id/send"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
 </RelativeLayout>
