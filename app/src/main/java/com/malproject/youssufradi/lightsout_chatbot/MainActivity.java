@@ -6,10 +6,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.GridView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -31,7 +34,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class MainActivity extends AppCompatActivity {
 
     private MessageAdapter adapter;
-    private ListView lv;
+    private GridView lv;
     private EditText edit;
     private Button send;
     String uuid;
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        lv = (ListView) findViewById(R.id.listView);
+        lv = (GridView) findViewById(R.id.listView);
 
         adapter = new MessageAdapter(this, R.layout.list_discuss);
 
@@ -71,7 +74,23 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         new FetchAuthFromApi().execute();
-//        addItems();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu (Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.refresh, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_refresh){
+            this.recreate();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void postData(){
